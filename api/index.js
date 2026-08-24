@@ -1,12 +1,13 @@
 const app = require('../app');
-const connectDB = require('../config/db');
+const mongoose = require('mongoose');
 
 module.exports = async (req, res) => {
-  try {
-    await connectDB();
-    return app(req, res);
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    res.status(500).json({ error: 'Database connection failed' });
+  if (mongoose.connection.readyState !== 1 && process.env.MONGO_URI) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI);
+    } catch (err) {
+      console.error('Atlas connection error:', err);
+    }
   }
+  return app(req, res);
 };
